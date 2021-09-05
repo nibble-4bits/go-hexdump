@@ -5,6 +5,52 @@ import (
 	"os"
 )
 
+const ROW_LENGTH = 16
+
+func printHeaderOffset() {
+	fmt.Printf("\n%12c", ' ')
+	for i := 0; i < ROW_LENGTH; i++ {
+		fmt.Printf("%02X ", i)
+	}
+	fmt.Printf("\n")
+}
+
+func printHexBytesRow(bytes []byte, offset int) {
+	for i := offset; i < offset+ROW_LENGTH; i++ {
+		if i < len(bytes) {
+			fmt.Printf("%02X ", bytes[i])
+		} else {
+			fmt.Printf("%3c", ' ')
+		}
+	}
+}
+
+func printASCIIRow(bytes []byte, offset int) {
+	fmt.Printf(" | ")
+	for i := offset; i < offset+ROW_LENGTH; i++ {
+		if i < len(bytes) {
+			if bytes[i] >= 32 && bytes[i] <= 126 {
+				fmt.Printf("%c", bytes[i])
+			} else {
+				fmt.Printf(".")
+			}
+		} else {
+			fmt.Printf(" ")
+		}
+	}
+	fmt.Printf(" |")
+}
+
+func printHexDump(bytes []byte) {
+	printHeaderOffset()
+	for i := 0; i < len(bytes); i += ROW_LENGTH {
+		fmt.Printf("\n%08X%4c", i, ' ')
+
+		printHexBytesRow(bytes, i)
+		printASCIIRow(bytes, i)
+	}
+}
+
 func main() {
 	args := os.Args
 	if len(args) != 2 {
@@ -19,36 +65,7 @@ func main() {
 		os.Exit(2)
 	}
 
-	fmt.Printf("\n            ")
-	for i := 0; i < 16; i++ {
-		fmt.Printf("%02X ", i)
-	}
-	fmt.Printf("\n")
+	printHexDump(bytes)
 
-	for i := 0; i < len(bytes); i += 16 {
-		fmt.Printf("\n%08X    ", i)
-
-		for j := i; j < i+16; j++ {
-			if j < len(bytes) {
-				fmt.Printf("%02X ", bytes[j])
-			} else {
-				fmt.Printf("   ")
-			}
-		}
-
-		fmt.Printf(" | ")
-		for j := i; j < i+16; j++ {
-			if j < len(bytes) {
-				if bytes[j] >= 32 && bytes[j] <= 126 {
-					fmt.Printf("%c", bytes[j])
-				} else {
-					fmt.Printf(".")
-				}
-			} else {
-				fmt.Printf(" ")
-			}
-		}
-		fmt.Printf(" |")
-	}
 	fmt.Printf("\n")
 }
